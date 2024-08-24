@@ -1,0 +1,13 @@
+CREATE DATABASE IF NOT EXISTS devBook;
+USE devBook;
+
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    nick VARCHAR(50) NOT NULL unique,
+    email VARCHAR(50) NOT NULL unique,
+    password VARCHAR(50) NOT NULL unique,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP()
+) ENGINE = INNODB;
