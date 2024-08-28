@@ -13,5 +13,8 @@ func main() {
 	fmt.Printf("Server running on port %d", config.Port)
 
 	r := router.Generate()
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
+	log.Fatal(http.ListenAndServe(
+		fmt.Sprintf(":%d", config.Port),
+		r,
+	))
 }

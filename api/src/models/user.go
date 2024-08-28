@@ -16,8 +16,8 @@ type User struct {
 }
 
 // Call the methods to validate user
-func (user *User) Prepared() error {
-	if err := user.validate(); err != nil {
+func (user *User) Prepared(step string) error {
+	if err := user.validate(step); err != nil {
 		return err
 	}
 
@@ -25,7 +25,7 @@ func (user *User) Prepared() error {
 	return nil
 }
 
-func (user *User) validate() error {
+func (user *User) validate(step string) error {
 	if user.Name == "" {
 		return errors.New("The name is required and cannot be empty")
 	}
@@ -38,7 +38,7 @@ func (user *User) validate() error {
 		return errors.New("The email is required and cannot be empty")
 	}
 
-	if user.Password == "" {
+	if step == "creation" && user.Password == "" {
 		return errors.New("The password is required and cannot be empty")
 	}
 
