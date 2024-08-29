@@ -19,6 +19,8 @@ type Route struct {
 // Configure configures the routes of the API
 func Configure(r *mux.Router) *mux.Router {
 	routes := userRoutes
+	routes = append(routes, loginRoute)
+
 	for _, route := range routes {
 		// Print the Function name
 		println(route.URI + " " + route.Method + " -> " + runtime.FuncForPC(reflect.ValueOf(route.Function).Pointer()).Name())
