@@ -12,6 +12,7 @@ import (
 var (
 	StringDataBaseConnection = ""
 	Port                     = 8080
+	SecretKey                []byte
 )
 
 // Set the environment variable in the application
@@ -32,5 +33,7 @@ func Init() {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 	)
+
+	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 
 }

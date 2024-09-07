@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"api/src/auth"
 	"api/src/database"
 	"api/src/models"
 	"api/src/repository"
@@ -45,6 +46,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf("Welcome %s", userOnBd.Name)))
+	token, err := auth.CreateToken(userOnBd.ID)
 
+	if err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Write([]byte(fmt.Sprintf(`{"token": "%s"}`, token)))
 }
