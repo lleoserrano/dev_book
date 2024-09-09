@@ -193,3 +193,125 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	response.JSON(w, http.StatusNoContent, nil)
 }
+
+func FollowUser(w http.ResponseWriter, r *http.Request) {
+	followerId, err := auth.ExtractUserId(r)
+	if err != nil {
+		response.ERROR(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	params := mux.Vars(r)
+	userId, err := strconv.ParseUint(params["userId"], 10, 64)
+	if err != nil {
+		response.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if followerId == userId {
+		response.ERROR(w, http.StatusForbidden, errors.New("you cannot follow yourself"))
+		return
+	}
+
+	db, err := database.Connect()
+	if err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepository(db)
+	if err = repo.Follow(userId, followerId); err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	response.JSON(w, http.StatusNoContent, nil)
+}
+
+func UnFollowUser(w http.ResponseWriter, r *http.Request) {
+	followerId, err := auth.ExtractUserId(r)
+	if err != nil {
+		response.ERROR(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	params := mux.Vars(r)
+	userId, err := strconv.ParseUint(params["userId"], 10, 64)
+	if err != nil {
+		response.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if followerId == userId {
+		response.ERROR(w, http.StatusForbidden, errors.New("you cannot unFollow yourself"))
+		return
+	}
+
+	db, err := database.Connect()
+	if err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepository(db)
+	if err = repo.UnFollow(userId, followerId); err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	response.JSON(w, http.StatusNoContent, nil)
+}
+
+func GetFollowersByUser(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	userId, err := strconv.ParseUint(params["userId"], 10, 64)
+	if err != nil {
+		response.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Connect()
+	if err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepository(db)
+	followers, err := repo.GetFollowersByUser(userId)
+	if err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	response.JSON(w, http.StatusOK, followers)
+
+}
+
+func GetFollowingByUser(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	userId, err := strconv.ParseUint(params["userId"], 10, 64)
+	if err != nil {
+		response.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Connect()
+	if err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	repo := repository.NewUserRepository(db)
+	following, err := repo.GetFollowingByUser(userId)
+	if err != nil {
+		response.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	response.JSON(w, http.StatusOK, following)
+}
