@@ -380,5 +380,4 @@ func UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.JSON(w, http.StatusNoContent, nil)
-
 }
