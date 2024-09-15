@@ -103,3 +103,107 @@ func (repository Posts) GetPosts(userId uint64) ([]models.Post, error) {
 
 	return posts, nil
 }
+
+func (repository Posts) UpdatePost(postId uint64, post models.Post) error {
+	statement, err := repository.db.Prepare(
+		"update posts set title = ?, content = ? where id = ?",
+	)
+
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(post.Title, post.Content, postId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository Posts) DeletePost(postId uint64) error {
+	statement, err := repository.db.Prepare(
+		"delete from posts where id = ?",
+	)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(postId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository Posts) GetPostsByUser(userId uint64) ([]models.Post, error) {
+	lines, err := repository.db.Query(`
+		select p.*, u.nick from posts p
+		join users u on u.id = p.author_id
+		where p.author_id = ?
+	`,
+		userId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer lines.Close()
+
+	var posts []models.Post
+
+	for lines.Next() {
+		var post models.Post
+
+		if err = lines.Scan(
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.AuthorID,
+			&post.Likes,
+			&post.CreatedAt,
+			&post.AuthorNick,
+		); err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
+func (repository Posts) LikePost(postId uint64) error {
+	statement, err := repository.db.Prepare(`
+		update posts set likes = likes + 1 where id = ?
+	`)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(postId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repository Posts) UnlikePost(postId uint64) error {
+	statement, err := repository.db.Prepare(`
+		update posts set likes = 
+		case when likes > 0 then likes - 1 
+		else likes end
+		where id = ?
+	`)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	if _, err = statement.Exec(postId); err != nil {
+		return err
+	}
+
+	return nil
+}
